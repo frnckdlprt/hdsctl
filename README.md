@@ -9,7 +9,7 @@ Prerequisites:
 - golang (https://go.dev/dl/)
 
 Then
-`go install github.com/frnckdlprt/hdsctl@latest`
+`go install github.com/frnckdlprt/hdsctl/cmd/hdsctl@latest`
 
 ## Usage
 
