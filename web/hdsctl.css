@@ -1,0 +1,81 @@
+
+.container {
+    font-family: Arial, Helvetica, sans-serif;
+    max-width: 860px;
+    border: solid 3px black;
+    padding: 15px 15px;
+    gap: 5px;
+    background-color: grey;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: normal;
+    justify-content: center;
+    margin: auto;
+
+}
+
+.child {
+    display: flex;
+    border: solid 2px black;
+    margin: 5px;
+    justify-content: normal;
+    background-color: #434247;
+    align-content: flex-start;
+}
+
+.ch1, .ch2, .hor, .awg, .trig, .dmm {
+    border: solid 3px black;
+    display: grid;
+    grid-template-columns: auto auto;
+    align-items: flex-start;
+    padding: 5px 5px;
+    color: white;
+}
+.screen {
+    align-self: center;
+}
+.dmm-measure {
+    color: yellow;
+    background-color: black;
+    font-size: 32px;
+    margin: 10px 2px;
+    text-align: center;
+    padding: 40px 10px;
+    align-self: center;
+}
+
+.lbl {
+    font-size: 16px;
+    align-self: center;
+    justify-self: center;
+    margin: 4px 2px;
+}
+
+.value {
+    font-size: 12px;
+    align-self: center;
+    height: 25px;
+    border-radius: 10%;
+    background-color: #04a0f7;
+    border-color: #04a0f7;
+    margin: 4px 2px;
+}
+
+.sel {
+    height: 28px;
+    background-color: #04a0f7;
+    border-color: #04a0f7;
+    color: black;
+    border-radius: 10%;
+    font-size: 12px;
+    align-self: center;
+    margin: 4px 2px;
+}
+
+.hdr {
+    font-size: 16px;
+    font-weight: bold;
+    grid-column: 1 / 3;
+    align-self: center;
+    justify-self: center;
+}

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="hdsctl.css"/>
+    <script src="hdsctl.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <div class="child screen">
+        <canvas id="myCanvas" width="300" height="200" style="border:0px solid #000000;"></canvas>
+    </div>
+
+
+    <div class="child ch1">
+        <div class="hdr">CH1</div>
+        <div class="lbl">Display</div>
+        <select id="ch1Disp" class="sel"></select>
+        <div class="lbl">Scale</div>
+        <select id="ch1Scal" class="sel"></select>
+        <div class="lbl">Offset</div>
+        <input id="ch1Offs" class="value" size="5"></input>
+        <div class="lbl">Probe</div>
+        <select id="ch1Prob" class="sel"></select>
+        <div class="lbl">Coupling</div>
+        <select id="ch1Coup" class="sel"></select>
+
+    </div>
+    <div class="child ch2">
+        <div class="hdr">CH2</div>
+        <div class="lbl">Display</div>
+        <select id="ch2Disp" class="sel"></select>
+        <div class="lbl">Scale</div>
+        <select id="ch2Scal" class="sel"></select>
+        <div class="lbl">Offset</div>
+        <input id="ch2Offs" class="value" size="5"></input>
+        <div class="lbl">Probe</div>
+        <select id="ch2Prob" class="sel"></select>
+        <div class="lbl">Coupling</div>
+        <select id="ch2Coup" class="sel"></select>
+    </div>
+
+    <div class="child awg">
+        <div class="hdr">AWG</div>
+        <div class="lbl">Status</div>
+        <select id="chan" class="sel"></select>
+        <div class="lbl">Waveform</div>
+        <select id="func" class="sel"></select>
+        <div class="lbl">Frequency</div>
+        <input id="funcFreq" class="value" size="5"></input>
+        <div class="lbl">Amplitude</div>
+        <input id="funcAmpl" class="value" size="5"></input>
+        <div class="lbl">Offset</div>
+        <input id="funcOffs" class="value" size="5"></input>
+        <div class="lbl">High</div>
+        <input id="funcHigh" class="value" size="5"></input>
+        <div class="lbl">Low</div>
+        <input id="funcLow" class="value" size="5"></input>
+    </div>
+
+    <div class="child dmm">
+        <div class="hdr">DMM</div>
+        <input id="dmmMeas" class="dmm-measure" size="8" readonly></input>
+    </div>
+
+
+    <div class="child hor">
+        <div class="hdr">HOR</div>
+        <div class="lbl">Scale</div>
+        <select id="horScal" class="sel"></select>
+        <div class="lbl">Offset</div>
+        <input id="horOffs" class="value" size="5"></input>
+        <div class="lbl">Acqu Mode</div>
+        <select id="acqMod" class="sel"></select>
+        <div class="lbl">Acqu Length</div>
+        <select id="acqDepm" class="sel"></select>
+    </div>
+
+    <div class="child trig">
+        <div class="hdr">Trig</div>
+        <div class="lbl">Source</div>
+        <select id="trigSingSour" class="sel"></select>
+        <div class="lbl">Type</div>
+        <select id="trigSingSwe" class="sel"></select>
+        <div class="lbl">Coupling</div>
+        <select id="trigSingCoup" class="sel"></select>
+        <div class="lbl">Slope</div>
+        <select id="trigSingEdg" class="sel"></select>
+        <div class="lbl">Level</div>
+        <input id="trigSingEdgLev" class="value" size="5"></input>
+    </div>
+
+
+</div>
+
+</body>
+</html>
