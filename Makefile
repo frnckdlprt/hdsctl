@@ -17,3 +17,8 @@ setup:
 build/hdsctl: $(GO_SOURCE)
 	@mkdir -p $(@D)
 	@go build $(GOFLAGS) -o $@ -ldflags="$(LD_FLAGS)" cmd/hdsctl/main.go
+
+.PHONY: clean
+clean:
+	rm -rf build
+

@@ -2,23 +2,23 @@ function renderWaves(waves) {
     let c = document.getElementById("myCanvas");
     let w = c.width;
     let h = c.height;
-    let hScale = 1;
-    let wSmall = parseInt(w) / 12;
-    let hSmall = parseInt(h) / 8;
+    let d = 25 * (w/300);
     let ctx = c.getContext("2d");
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, w, h);
     ctx.fillStyle = "white";
 
     for (let j = 0; j < h; j++) {
+        let y = h / 2 - j;
         for (let i = 0; i < w; i++) {
-            if ((i % (wSmall / 5) === 0 && (j % hSmall === 0 || j === h / 2 + 1 || j === h / 2 - 1 || j === h - 1)) ||
-                (((i % wSmall === 0) || (i === w / 2 - 1) || (i === w / 2 + 1) || i === w - 1) && j % (hSmall / 5) === 0)) {
+            let x = w / 2 - i;
+            if ((x % (d / 5) === 0 && (y % d === 0 || y === 1 || y === - 1 )) ||
+                (((x % d === 0) || (x === -1) || (x === 1) || x === w - 1) && y % (d / 5) === 0)) {
                 ctx.fillRect(i, j, 1, 1);
             }
         }
     }
-
+    
     for (var wav of waves) {
         ctx.beginPath();
         ctx.mozImageSmoothingEnabled = false;
@@ -27,12 +27,11 @@ function renderWaves(waves) {
         let i = 0;
         let values = wav.data.split(" ");
         for (var v of values) {
-            //let j = 115 - parseInt(v); // when using 230 maximum vertical resolution
-            let j = Math.min(200, Math.max(1, 100 - parseInt(v)));
+            let j = Math.min(230, Math.max(1, 115 - parseInt(v)));
             if (i == 0) {
-                ctx.moveTo(0, j);
+                ctx.moveTo(0, j * 2);
             } else {
-                ctx.lineTo(i * 300 / values.length, j);
+                ctx.lineTo(i * 600 / values.length, j * 2);
                 //ctx.lineTo(i, j *2);
             }
             i++;
@@ -53,7 +52,7 @@ window.addEventListener("load", function (evt) {
         if (fields['wave2']) {
             waves.push({data: fields['wave2'], color: 'blue'});
         }
-        if (waves.length>0) {
+        if (waves.length > 0) {
             renderWaves(waves);
         }
         for (var k in fields) {
@@ -81,12 +80,12 @@ window.addEventListener("load", function (evt) {
                 console.log("unknown element: ", k);
                 continue;
             }
-            if (["funcOffs","funcAmpl","funcLow", "funcHigh"].includes(k)) {
-                el.value = (parseFloat(value)/1000).toFixed(2);
+            if (["funcOffs", "funcAmpl", "funcLow", "funcHigh"].includes(k)) {
+                el.value = (parseFloat(value) / 1000).toFixed(2);
                 continue;
             }
             if (["funcFreq"].includes(k)) {
-                el.value = (parseFloat(value)/1000000).toFixed(3);
+                el.value = (parseFloat(value) / 1000000).toFixed(3);
                 continue;
             }
             el.value = value;

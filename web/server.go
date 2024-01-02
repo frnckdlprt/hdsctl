@@ -69,6 +69,7 @@ func wsEndpoint(hds *hdsctl.HDS, w http.ResponseWriter, r *http.Request) {
 						vals += fmt.Sprintf("%v ", int8(w))
 					}
 					data[fmt.Sprintf("wave%v", i)] = vals
+					fmt.Printf("wave length=%v\n", len(wav))
 				}
 			}
 
