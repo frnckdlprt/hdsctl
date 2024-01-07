@@ -26,6 +26,35 @@ import (
 	"strings"
 )
 
+///* #include <libusb-1.0/libusb.h>
+//void hdsctl_libusb_set_debug(libusb_context *ctx, int level) {
+//	libusb_set_option(ctx, LIBUSB_OPTION_LOG_LEVEL, level);
+//}
+//*/
+//import "C"
+//
+//func main0() {
+//	var ctx *C.libusb_context
+//	C.libusb_init(&ctx)
+//	C.hdsctl_libusb_set_debug(ctx, C.LIBUSB_LOG_LEVEL_INFO)
+//	//C.hdsctl_libusb_set_debug(ctx, C.LIBUSB_LOG_LEVEL_DEBUG)
+//	handle := C.libusb_open_device_with_vid_pid(ctx, 0x5345, 0x1234)
+//	if handle == nil {
+//		log.Fatal("device not found")
+//	}
+//	msg := "*IDN?"
+//	transferred := C.int(0)
+//	C.libusb_bulk_transfer(handle, 0x01, (*C.uchar)(unsafe.Pointer(C.CString(msg))), C.int(len(msg)), &transferred, 1000)
+//	fmt.Printf("write transferred=%v\n", transferred)
+//	buff := make([]byte, 10000)
+//	C.libusb_bulk_transfer(handle, 0x81, (*C.uchar)(unsafe.Pointer(&buff[0])), C.int(len(buff)), &transferred, 1000)
+//	fmt.Printf("read transferred=%v\n", transferred)
+//	fmt.Println(string(buff[:transferred]))
+//	C.libusb_close(handle)
+//	C.libusb_exit(nil)
+//	log.Println("done")
+//}
+
 func main() {
 	executor := scpi.NewHDSExecutor()
 	defer executor.Close()

@@ -17,18 +17,26 @@ limitations under the License.
 package scpi
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/google/gousb"
 	"log"
 	"strings"
 	"sync"
 	"time"
+	"unsafe"
 )
 
-const vendorID = gousb.ID(0x5345)
-const productID = gousb.ID(0x1234)
+/*
+#cgo pkg-config: libusb-1.0
+#include <libusb.h>
+void hdsctl_libusb_set_debug(libusb_context *ctx, int level) {
+	libusb_set_option(ctx, LIBUSB_OPTION_LOG_LEVEL, level);
+}
+*/
+import "C"
+
+const vendorID = 0x5345
+const productID = 0x1234
 const inEndpoint = 0x81
 const outEndpoint = 0x01
 const throttleDelay = 10 * time.Millisecond
@@ -36,15 +44,11 @@ const discardReadTimeout = 10 * time.Millisecond
 const cacheTimeout = 500 * time.Millisecond
 
 type HDSExecutor struct {
-	usbCtx      *gousb.Context
-	usbDev      *gousb.Device
-	usbIntf     *gousb.Interface
-	usbInep     *gousb.InEndpoint
-	usbOutep    *gousb.OutEndpoint
-	usbIntfDone func()
-	lastCmdTs   time.Time
-	cache       map[string]CacheEntry
-	execSync    sync.Mutex
+	usbCtx    *C.libusb_context
+	usbDev    *C.libusb_device_handle
+	lastCmdTs time.Time
+	cache     map[string]CacheEntry
+	execSync  sync.Mutex
 }
 
 type CacheEntry struct {
@@ -54,28 +58,10 @@ type CacheEntry struct {
 
 func NewHDSExecutor() (h *HDSExecutor) {
 	h = &HDSExecutor{}
+	C.libusb_init(&h.usbCtx)
+	C.hdsctl_libusb_set_debug(h.usbCtx, C.LIBUSB_LOG_LEVEL_DEBUG)
+	h.usbDev = C.libusb_open_device_with_vid_pid(h.usbCtx, vendorID, productID)
 	h.cache = map[string]CacheEntry{}
-	h.usbCtx = gousb.NewContext()
-	var err error
-	h.usbDev, err = h.usbCtx.OpenDeviceWithVIDPID(vendorID, productID)
-	if err != nil {
-		log.Fatalf("failed to open usb device: %s", err)
-	}
-	if h.usbDev == nil {
-		log.Fatalf("failed to find usb device")
-	}
-	h.usbIntf, h.usbIntfDone, err = h.usbDev.DefaultInterface()
-	if err != nil {
-		log.Fatalf("failed to retrieve default interface for usb device: %s", err)
-	}
-	h.usbInep, err = h.usbIntf.InEndpoint(inEndpoint)
-	if err != nil {
-		log.Fatalf("failed to retrieve InEndpoint for usb device: %s", err)
-	}
-	h.usbOutep, err = h.usbIntf.OutEndpoint(outEndpoint)
-	if err != nil {
-		log.Fatalf("failed to retrieve OutEndpoint for usb device: %s", err)
-	}
 	h.lastCmdTs = time.Now()
 	idn, err := h.Execute(Command{Definition: &CommandDefinition{Name: "*IDN"}})
 	if err != nil {
@@ -88,15 +74,10 @@ func NewHDSExecutor() (h *HDSExecutor) {
 }
 
 func (hds *HDSExecutor) Close() {
-	if hds.usbCtx != nil {
-		defer hds.usbCtx.Close()
-	}
 	if hds.usbDev != nil {
-		defer hds.usbDev.Close()
+		defer C.libusb_close(hds.usbDev)
 	}
-	if hds.usbIntfDone != nil {
-		defer hds.usbIntfDone()
-	}
+	C.libusb_exit(nil)
 }
 
 // wait for a minimum of throttle delay between usb commands
@@ -111,15 +92,12 @@ func (hds *HDSExecutor) throttle() {
 // flush any previous responses
 func (hds *HDSExecutor) discardReads() {
 	for {
-		ctxTimeout, cancel := context.WithTimeout(context.Background(), discardReadTimeout)
-		defer cancel()
+
 		buff := make([]byte, 10000)
-		_, err := hds.usbInep.ReadContext(ctxTimeout, buff)
-		if ctxTimeout.Err() == context.DeadlineExceeded {
+		transferred := C.int(0)
+		C.libusb_bulk_transfer(hds.usbDev, inEndpoint, (*C.uchar)(unsafe.Pointer(&buff[0])), C.int(len(buff)), &transferred, 1000)
+		if transferred == C.int(0) {
 			return
-		}
-		if err != nil {
-			log.Printf("failed to read bytes: %v", err)
 		}
 	}
 }
@@ -139,26 +117,21 @@ func (hds *HDSExecutor) Execute(cmd Command) (result []byte, err error) {
 		c = fmt.Sprintf("%s %s", cmd.Definition.Name, cmd.Arguments[0])
 	}
 	hds.throttle()
-	hds.discardReads()
-	//fmt.Printf("EXECUTE: %s\n", c)
-	numBytes, err := hds.usbOutep.Write([]byte(c))
-	if numBytes != len(c) {
-		return nil, fmt.Errorf("only %d bytes written: %w", numBytes, err)
+	//hds.discardReads()
+	transferred := C.int(0)
+	C.libusb_bulk_transfer(hds.usbDev, outEndpoint, (*C.uchar)(unsafe.Pointer(C.CString(c))), C.int(len(c)), &transferred, 1000)
+	if transferred != C.int(len(c)) {
+		return nil, fmt.Errorf("only %d bytes written: %w", transferred, err)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to write: %w", err)
 	}
 	if len(cmd.Arguments) == 0 {
-		ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
 		buff := make([]byte, 10000)
-		readBytes, err := hds.usbInep.ReadContext(ctxTimeout, buff)
-		if err != nil {
-			log.Printf("failed to read bytes for command %s: %v", c, err)
-		}
-		result = buff[:readBytes]
-		if strings.HasPrefix(c, ":DATa:WAVe:SCReen:") && readBytes < 100 {
-			return nil, fmt.Errorf("unexpected length %v for %s", readBytes, c)
+		C.libusb_bulk_transfer(hds.usbDev, inEndpoint, (*C.uchar)(unsafe.Pointer(&buff[0])), C.int(len(buff)), &transferred, 1000)
+		result = buff[:transferred]
+		if strings.HasPrefix(c, ":DATa:WAVe:SCReen:") && transferred < 100 {
+			return nil, fmt.Errorf("unexpected length %v for %s", transferred, c)
 		}
 		hds.cache[cmd.Definition.Name] = CacheEntry{Value: result, Timestamp: time.Now()}
 		if cmd.Definition.Name == ":DATa:WAVe:SCReen:HEAD" {
