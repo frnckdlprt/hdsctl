@@ -26,14 +26,17 @@ import (
 	"strings"
 )
 
-///* #include <libusb-1.0/libusb.h>
+//
+///*
+//#cgo pkg-config: libusb-1.0
+//#include <libusb.h>
 //void hdsctl_libusb_set_debug(libusb_context *ctx, int level) {
 //	libusb_set_option(ctx, LIBUSB_OPTION_LOG_LEVEL, level);
 //}
 //*/
 //import "C"
 //
-//func main0() {
+//func main() {
 //	var ctx *C.libusb_context
 //	C.libusb_init(&ctx)
 //	C.hdsctl_libusb_set_debug(ctx, C.LIBUSB_LOG_LEVEL_INFO)
@@ -42,6 +45,7 @@ import (
 //	if handle == nil {
 //		log.Fatal("device not found")
 //	}
+//	C.libusb_claim_interface(handle, 0)
 //	msg := "*IDN?"
 //	transferred := C.int(0)
 //	C.libusb_bulk_transfer(handle, 0x01, (*C.uchar)(unsafe.Pointer(C.CString(msg))), C.int(len(msg)), &transferred, 1000)
