@@ -71,6 +71,9 @@ func NewHDSExecutor() (h *HDSExecutor) {
 	if h.usbDev == nil {
 		log.Fatalf("failed to open usb device")
 	}
+	if ret := C.libusb_claim_interface(h.usbDev, 0); ret != 0 {
+		log.Fatalf("failed to claim usb device interface")
+	}
 	h.cache = map[string]CacheEntry{}
 	h.lastCmdTs = time.Now()
 	h.discardReads()
