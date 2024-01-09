@@ -56,8 +56,10 @@ func wsEndpoint(hds *hdsctl.HDS, w http.ResponseWriter, r *http.Request) {
 	go func() {
 
 		lastdata := map[string]interface{}{}
+		c := 0
 		for {
-			time.Sleep(150 * time.Millisecond)
+			c = c + 1
+			time.Sleep(250 * time.Millisecond)
 			data := map[string]interface{}{}
 			hds.GetField("datWavScrHead")
 			for i := 1; i <= 2; i++ {
@@ -71,14 +73,23 @@ func wsEndpoint(hds *hdsctl.HDS, w http.ResponseWriter, r *http.Request) {
 					data[fmt.Sprintf("wave%v", i)] = vals
 				}
 			}
+			var fields []string
 
-			fields := []string{
-				"ch1Disp", "ch1Scal", "ch1Offs", "ch1Prob", "ch1Coup",
-				"ch2Disp", "ch2Scal", "ch2Offs", "ch2Prob", "ch2Coup",
-				"horScal", "horOffs", "acqMod", "acqDepm",
-				"func", "funcOffs", "chan", "funcFreq", "funcAmpl", "funcLow", "funcHigh",
-				"trigSingSour", "trigSingCoup", "trigSingEdg", "trigSingSwe", "trigSingEdgLev",
-				"dmmMeas"}
+			if c%8 != 0 {
+				fields = []string{
+					"ch1Disp", "ch2Disp",
+				}
+			} else {
+				fields = []string{
+					"ch1Disp", "ch1Scal", "ch1Offs", "ch1Prob", "ch1Coup",
+					"ch2Disp", "ch2Scal", "ch2Offs", "ch2Prob", "ch2Coup",
+					"horScal", "horOffs", "acqMod", "acqDepm",
+					"func", "funcOffs", "chan", "funcFreq", "funcAmpl", "funcLow", "funcHigh",
+					"trigSingSour", "trigSingCoup", "trigSingEdg", "trigSingSwe", "trigSingEdgLev",
+				}
+				//"dmmMeas"}
+			}
+
 			for _, f := range fields {
 				cd := hds.Client.GetCommandDefinitionById(f)
 				if cd == nil {
