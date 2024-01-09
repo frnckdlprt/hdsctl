@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/frnckdlprt/hdsctl/scpi"
-	"github.com/google/gousb"
 	"testing"
 	"time"
 )
@@ -104,72 +103,6 @@ func Test_Wave(t *testing.T) {
 		t.Errorf("failed getting wave: %v", err)
 	}
 	fmt.Printf(fmt.Sprint(wav))
-}
-
-func Test_Wave1(t *testing.T) {
-	ctx := gousb.NewContext()
-	defer ctx.Close()
-	ctx.Debug(9)
-	vendorID := gousb.ID(0x5345)
-	productID := gousb.ID(0x1234)
-	dev, err := ctx.OpenDeviceWithVIDPID(vendorID, productID)
-	defer dev.Close()
-	if err != nil {
-		t.Errorf("failed to open device: %v", err)
-	}
-	intf, done, err := dev.DefaultInterface()
-	if err != nil {
-		t.Errorf("failed to retrieve default interface for device %v: %v", dev, err)
-	}
-	defer done()
-
-	outep, err := intf.OutEndpoint(0x01)
-	var cmd string
-	var numBytes int
-	var inep *gousb.InEndpoint
-	var buff []byte
-	var readBytes int
-
-	//cmd := ":DATA:WAVE:SCREEN:HEAD?"
-	//numBytes, err := outep.Write([]byte(cmd))
-	//if numBytes != len(cmd) {
-	//	t.Errorf("%s: only %d bytes written: %v", outep, numBytes, err)
-	//}
-	//if err != nil {
-	//	t.Errorf("failed to write: %v", err)
-	//}
-	//
-	//inep, err := intf.InEndpoint(0x81)
-	//buff := make([]byte, 10000)
-	//readBytes, err := inep.Read(buff)
-	//if err != nil {
-	//	t.Errorf("failed to read bytes: %v", err)
-	//}
-	//fmt.Println(string(buff[4:readBytes]))
-
-	cmd = ":DATA:WAVE:SCREEN:CH1?"
-	numBytes, err = outep.Write([]byte(cmd))
-	if numBytes != len(cmd) {
-		t.Errorf("%s: only %d bytes written: %v", outep, numBytes, err)
-	}
-	if err != nil {
-		t.Errorf("failed to write: %v", err)
-	}
-
-	inep, err = intf.InEndpoint(0x81)
-	buff = make([]byte, 10000)
-	readBytes, err = inep.Read(buff)
-	if err != nil {
-		t.Errorf("failed to read bytes: %v", err)
-	}
-	result := ""
-	for idx := 4; idx < readBytes; idx = idx + 2 {
-		val := (int16(buff[idx+2]) << 8) + int16(buff[idx])
-		result = result + fmt.Sprintf("%v\n", val)
-	}
-
-	fmt.Println(result)
-
 }
 
 func Test_JSON(t *testing.T) {

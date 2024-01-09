@@ -6,6 +6,7 @@ GOFLAGS := -mod=mod
 LD_FLAGS= \
 	-X github.com/frnckdlprt/hdsctl/version.Version=$(VERSION) \
 	-X github.com/frnckdlprt/hdsctl/version.BuildDate=$(BUILD_DATE)
+#	-linkmode 'external' -extldflags '-static -L/usr/lib64'
 
 GO_SOURCE := $(shell find ./ -name "*.go")
 
